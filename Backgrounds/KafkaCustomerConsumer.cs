@@ -83,7 +83,7 @@ namespace EscortBookCustomerConsumer.Backgrounds
 
                     var newProfileStatus = new ProfileStatus
                     {
-                        ProfileID = newProfile.ID,
+                        CustomerID = kafkaUserEvent.Id,
                         ProfileStatusCategoryID = createdStatus.ID
                     };
 

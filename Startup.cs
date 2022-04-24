@@ -18,7 +18,7 @@ namespace EscortBookCustomerConsumer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<EscortBookCustomerConsumerContext>(options
-                => options.UseSqlServer(Configuration["ConnectionStrings:Default"]));
+                => options.UseNpgsql(Configuration["ConnectionStrings:Default"]));
             services.AddTransient<IProfileStatusCategoryRepository, ProfileStatusCategoryRepository>();
             services.AddTransient<IProfileStatusRepository, ProfileStatusRepository>();
             services.AddTransient<IProfileRepository, ProfileRepository>();
