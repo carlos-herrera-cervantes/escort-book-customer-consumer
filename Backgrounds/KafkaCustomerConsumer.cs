@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using EscortBookCustomerConsumer.Repositories;
 using EscortBookCustomerConsumer.Models;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace EscortBookCustomerConsumer.Backgrounds
 {
@@ -24,26 +25,27 @@ namespace EscortBookCustomerConsumer.Backgrounds
 
         private readonly IProfileStatusCategoryRepository _profileStatusCategoryRepository;
 
+        private readonly ILogger _logger;
+
         #endregion
 
         #region snippet_Constructor
 
-        public KafkaCustomerConsumer(IConfiguration configuration, IServiceScopeFactory factory)
+        public KafkaCustomerConsumer
+        (
+            IConfiguration configuration,
+            ILogger<KafkaCustomerConsumer> logger,
+            IServiceScopeFactory factory
+        )
         {
             _configuration = configuration;
-            _profileRepository = factory
-                .CreateScope()
-                .ServiceProvider
-                .GetRequiredService<IProfileRepository>();
-            
-            _profileStatusRepository = factory
-                .CreateScope()
-                .ServiceProvider
-                .GetRequiredService<IProfileStatusRepository>();
+            _logger = logger;
 
-            _profileStatusCategoryRepository = factory
-                .CreateScope()
-                .ServiceProvider
+            var serviceProvider = factory.CreateScope().ServiceProvider;
+
+            _profileRepository = serviceProvider.GetRequiredService<IProfileRepository>();
+            _profileStatusRepository = serviceProvider.GetRequiredService<IProfileStatusRepository>();
+            _profileStatusCategoryRepository = serviceProvider
                 .GetRequiredService<IProfileStatusCategoryRepository>();
         }
 
@@ -61,7 +63,7 @@ namespace EscortBookCustomerConsumer.Backgrounds
             };
 
             using var builder = new ConsumerBuilder<Ignore, string>(config).Build();
-            builder.Subscribe(_configuration["Kafka:Topic"]);
+            builder.Subscribe(_configuration["Kafka:Topics:CustomerCreated"]);
 
             var cancelToken = new CancellationTokenSource();
             var createdStatus = await _profileStatusCategoryRepository.GetByName("Created");
@@ -71,7 +73,8 @@ namespace EscortBookCustomerConsumer.Backgrounds
                 try
                 {
                     var consumer = builder.Consume(cancelToken.Token);
-                    var kafkaUserEvent = JsonConvert.DeserializeObject<KafkaUserEvent>(consumer.Message.Value);
+                    var kafkaUserEvent = JsonConvert
+                        .DeserializeObject<KafkaUserEvent>(consumer.Message.Value);
                     
                     var newProfile = new Profile
                     {
@@ -91,7 +94,8 @@ namespace EscortBookCustomerConsumer.Backgrounds
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"AN ERROR HAS OCURRED: {e.Message}");
+                    _logger.LogError("AN ERROR HAS OCCURRED CREATING A CUSTOMER");
+                    _logger.LogError(e.Message);
                     builder.Close();
                 }
             }

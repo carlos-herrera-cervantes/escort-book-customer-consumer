@@ -5,6 +5,10 @@ namespace EscortBookCustomerConsumer.Repositories
 {
     public interface IProfileStatusRepository
     {
-         Task CreateAsync(ProfileStatus profileStatus);
+        Task<ProfileStatus> GetByProfileIdAsync(string profileId);
+
+        Task CreateAsync(ProfileStatus profileStatus);
+
+        Task UpdateAsync(ProfileStatus profileStatus);
     }
 }

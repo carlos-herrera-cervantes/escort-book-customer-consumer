@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using EscortBookCustomerConsumer.Contexts;
 using EscortBookCustomerConsumer.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EscortBookCustomerConsumer.Repositories
 {
@@ -21,9 +22,21 @@ namespace EscortBookCustomerConsumer.Repositories
 
         #region snippet_ActionMethods
 
+        public async Task<ProfileStatus> GetByProfileIdAsync(string profileId)
+            => await _context
+                .ProfileStatus
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.CustomerID == profileId);
+
         public async Task CreateAsync(ProfileStatus profileStatus)
         {
             await _context.ProfileStatus.AddAsync(profileStatus);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(ProfileStatus profileStatus)
+        {
+            _context.Entry(profileStatus).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
 
