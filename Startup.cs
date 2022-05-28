@@ -11,7 +11,7 @@ namespace EscortBookCustomerConsumer
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; set; }
+        private IConfiguration Configuration { get; set; }
 
         public Startup(IConfiguration configuration) => Configuration = configuration;
 
@@ -23,6 +23,7 @@ namespace EscortBookCustomerConsumer
             services.AddTransient<IProfileStatusRepository, ProfileStatusRepository>();
             services.AddTransient<IProfileRepository, ProfileRepository>();
             services.AddHostedService<KafkaCustomerConsumer>();
+            services.AddHostedService<KafkaActiveAccountConsumer>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {}
