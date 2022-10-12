@@ -2,46 +2,45 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EscortBookCustomerConsumer.Models
+namespace EscortBookCustomerConsumer.Models;
+
+[Table("profile", Schema = "public")]
+public class Profile
 {
-    [Table("profile", Schema = "public")]
-    public class Profile
-    {
-        #region snippet_Properties
+    #region snippet_Properties
 
-        [Column("id")]
-        public string ID { get; set; } = Guid.NewGuid().ToString();
+    [Column("id")]
+    public string ID { get; set; } = Guid.NewGuid().ToString();
 
-        [Column("customer_id")]
-        [Required]
-        public string CustomerID { get; set; }
+    [Column("customer_id")]
+    [Required]
+    public string CustomerID { get; set; }
 
-        [Column("first_name")]
-        public string FirstName { get; set; }
+    [Column("first_name")]
+    public string FirstName { get; set; }
 
-        [Column("last_name")]
-        public string LastName { get; set; }
+    [Column("last_name")]
+    public string LastName { get; set; }
 
-        [Column("email")]
-        [Required]
-        [DataType(DataType.EmailAddress)]
-        public string Email { get; set; }
+    [Column("email")]
+    [Required]
+    [DataType(DataType.EmailAddress)]
+    public string Email { get; set; }
 
-        [Column("phone_number")]
-        public string PhoneNumber { get; set; }
+    [Column("phone_number")]
+    public string PhoneNumber { get; set; }
 
-        [Column("gender")]
-        public string Gender { get; set; } = "NotSpecified";
+    [Column("gender")]
+    public string Gender { get; set; } = "NotSpecified";
 
-        [Column("birthdate")]
-        public DateTime Birthdate { get; set; }
+    [Column("birthdate")]
+    public DateTime Birthdate { get; set; }
 
-        [Column("created_at")]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        [Column("updated_at")]
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    [Column("updated_at")]
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        #endregion
-    }
+    #endregion
 }

@@ -1,10 +1,9 @@
 using System.Threading.Tasks;
 using EscortBookCustomerConsumer.Models;
 
-namespace EscortBookCustomerConsumer.Repositories
+namespace EscortBookCustomerConsumer.Repositories;
+
+public interface IProfileStatusCategoryRepository
 {
-    public interface IProfileStatusCategoryRepository
-    {
-         Task<ProfileStatusCategory> GetByName(string name);
-    }
+    Task<ProfileStatusCategory> GetByName(string name);
 }

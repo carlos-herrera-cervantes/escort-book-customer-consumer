@@ -1,14 +1,13 @@
 using System.Threading.Tasks;
 using EscortBookCustomerConsumer.Models;
 
-namespace EscortBookCustomerConsumer.Repositories
+namespace EscortBookCustomerConsumer.Repositories;
+
+public interface IProfileStatusRepository
 {
-    public interface IProfileStatusRepository
-    {
-        Task<ProfileStatus> GetByProfileIdAsync(string profileId);
+    Task<ProfileStatus> GetByProfileIdAsync(string profileId);
 
-        Task CreateAsync(ProfileStatus profileStatus);
+    Task CreateAsync(ProfileStatus profileStatus);
 
-        Task UpdateAsync(ProfileStatus profileStatus);
-    }
+    Task UpdateAsync(ProfileStatus profileStatus);
 }

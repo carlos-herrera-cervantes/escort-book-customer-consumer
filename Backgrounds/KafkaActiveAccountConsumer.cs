@@ -4,92 +4,87 @@ using System.Threading.Tasks;
 using Confluent.Kafka;
 using EscortBookCustomerConsumer.Repositories;
 using EscortBookCustomerConsumer.Types;
-using Microsoft.Extensions.Configuration;
+using EscortBookCustomerConsumer.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace EscortBookCustomerConsumer.Backgrounds
+namespace EscortBookCustomerConsumer.Backgrounds;
+
+public class KafkaActiveAccountConsumer : BackgroundService
 {
-    public class KafkaActiveAccountConsumer : BackgroundService
+    #region snippet_Properties
+
+    private readonly IProfileStatusRepository _profileStatusRepository;
+
+    private readonly IProfileStatusCategoryRepository _profileStatusCategoryRepository;
+
+    private readonly ILogger _logger;
+
+    #endregion
+
+    #region snippet_Constructors
+
+    public KafkaActiveAccountConsumer
+    (
+        ILogger<KafkaActiveAccountConsumer> logger,
+        IServiceScopeFactory factory
+    )
     {
-        #region snippet_Properties
+        _logger = logger;
 
-        private readonly IConfiguration _configuration;
+        var serviceProvider = factory.CreateScope().ServiceProvider;
 
-        private readonly IProfileStatusRepository _profileStatusRepository;
+        _profileStatusRepository = serviceProvider.GetRequiredService<IProfileStatusRepository>();
+        _profileStatusCategoryRepository = serviceProvider
+            .GetRequiredService<IProfileStatusCategoryRepository>();
+    }
 
-        private readonly IProfileStatusCategoryRepository _profileStatusCategoryRepository;
+    #endregion
 
-        private readonly ILogger _logger;
+    #region snippet_ActionMethods
 
-        #endregion
-
-        #region snippet_Constructors
-
-        public KafkaActiveAccountConsumer
-        (
-            IConfiguration configuration,
-            ILogger<KafkaActiveAccountConsumer> logger, 
-            IServiceScopeFactory factory
-        )
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        var config = new ConsumerConfig
         {
-            _configuration = configuration;
-            _logger = logger;
+            GroupId = Environment.GetEnvironmentVariable("KAFKA_GROUP_ID"),
+            BootstrapServers = Environment.GetEnvironmentVariable("KAFKA_SERVERS"),
+            AutoOffsetReset = AutoOffsetReset.Earliest
+        };
 
-            var serviceProvider = factory.CreateScope().ServiceProvider;
+        using var builder = new ConsumerBuilder<Ignore, string>(config).Build();
+        builder.Subscribe(KafkaTopic.UserActiveAccount);
 
-            _profileStatusRepository = serviceProvider.GetRequiredService<IProfileStatusRepository>();
-            _profileStatusCategoryRepository = serviceProvider
-                .GetRequiredService<IProfileStatusCategoryRepository>();
-        }
+        var cancelToken = new CancellationTokenSource();
+        var activeStatus = await _profileStatusCategoryRepository.GetByName("Active");
 
-        #endregion
-
-        #region snippet_ActionMethods
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        while (!stoppingToken.IsCancellationRequested)
         {
-            var config = new ConsumerConfig
+            try
             {
-                GroupId = _configuration["Kafka:GroupId"],
-                BootstrapServers = _configuration["Kafka:Servers"],
-                AutoOffsetReset = AutoOffsetReset.Earliest
-            };
+                var consumer = builder.Consume(cancelToken.Token);
+                var kafkaActiveAccountEvent = JsonConvert
+                    .DeserializeObject<KafkaActiveAccountEvent>(consumer.Message.Value);
 
-            using var builder = new ConsumerBuilder<Ignore, string>(config).Build();
-            builder.Subscribe(_configuration["Kafka:Topics:UserActiveAccount"]);
+                var profileStatus = await _profileStatusRepository
+                    .GetByProfileIdAsync(kafkaActiveAccountEvent.UserId);
 
-            var cancelToken = new CancellationTokenSource();
-            var activeStatus = await _profileStatusCategoryRepository.GetByName("Active");
+                if (profileStatus is null) continue;
 
-            while (!stoppingToken.IsCancellationRequested)
+                profileStatus.ProfileStatusCategoryID = activeStatus.ID;
+
+                await _profileStatusRepository.UpdateAsync(profileStatus);
+            }
+            catch (Exception e)
             {
-                try
-                {
-                    var consumer = builder.Consume(cancelToken.Token);
-                    var kafkaActiveAccountEvent = JsonConvert
-                        .DeserializeObject<KafkaActiveAccountEvent>(consumer.Message.Value);
-
-                    var profileStatus = await _profileStatusRepository
-                        .GetByProfileIdAsync(kafkaActiveAccountEvent.UserId);
-
-                    if (profileStatus is null) continue;
-
-                    profileStatus.ProfileStatusCategoryID = activeStatus.ID;
-
-                    await _profileStatusRepository.UpdateAsync(profileStatus);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError("AN ERROR HAS OCCURRED ACTIVATING CUSTOMER ACCOUNT:");
-                    _logger.LogError(e.Message);
-                    builder.Close();
-                }
+                _logger.LogError("AN ERROR HAS OCCURRED ACTIVATING CUSTOMER ACCOUNT:");
+                _logger.LogError(e.Message);
+                builder.Close();
             }
         }
-
-        #endregion
     }
+
+    #endregion
 }
