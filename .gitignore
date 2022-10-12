@@ -27,3 +27,4 @@ Properties
 bin
 .vs
 .idea
+.env

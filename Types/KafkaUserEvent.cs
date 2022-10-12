@@ -1,13 +1,12 @@
 using Newtonsoft.Json;
 
-namespace EscortBookCustomerConsumer.Types
-{
-    public class KafkaUserEvent
-    {
-        [JsonProperty("_id")]
-        public string Id { get; set; }
+namespace EscortBookCustomerConsumer.Types;
 
-        [JsonProperty("email")]
-        public string Email { get; set; }
-    }
+public class KafkaUserEvent
+{
+    [JsonProperty("_id")]
+    public string Id { get; set; }
+
+    [JsonProperty("email")]
+    public string Email { get; set; }
 }

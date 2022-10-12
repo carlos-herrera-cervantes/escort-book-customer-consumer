@@ -1,10 +1,9 @@
 using System.Threading.Tasks;
 using EscortBookCustomerConsumer.Models;
 
-namespace EscortBookCustomerConsumer.Repositories
+namespace EscortBookCustomerConsumer.Repositories;
+
+public interface IProfileRepository
 {
-    public interface IProfileRepository
-    {
-         Task CreateAsync(Profile profile);
-    }
+    Task CreateAsync(Profile profile);
 }
