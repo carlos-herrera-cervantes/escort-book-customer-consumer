@@ -17,10 +17,10 @@ public class Profile
     public string CustomerID { get; set; }
 
     [Column("first_name")]
-    public string FirstName { get; set; }
+    public string FirstName { get; set; } = "empty";
 
     [Column("last_name")]
-    public string LastName { get; set; }
+    public string LastName { get; set; } = "empty";
 
     [Column("email")]
     [Required]
@@ -28,7 +28,7 @@ public class Profile
     public string Email { get; set; }
 
     [Column("phone_number")]
-    public string PhoneNumber { get; set; }
+    public string PhoneNumber { get; set; } = "empty";
 
     [Column("gender")]
     public string Gender { get; set; } = "NotSpecified";

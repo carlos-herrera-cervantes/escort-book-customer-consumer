@@ -26,19 +26,13 @@ public class KafkaActiveAccountConsumer : BackgroundService
 
     #region snippet_Constructors
 
-    public KafkaActiveAccountConsumer
-    (
-        ILogger<KafkaActiveAccountConsumer> logger,
-        IServiceScopeFactory factory
-    )
+    public KafkaActiveAccountConsumer(ILogger<KafkaActiveAccountConsumer> logger, IServiceScopeFactory factory)
     {
-        _logger = logger;
-
         var serviceProvider = factory.CreateScope().ServiceProvider;
 
+        _logger = logger;
         _profileStatusRepository = serviceProvider.GetRequiredService<IProfileStatusRepository>();
-        _profileStatusCategoryRepository = serviceProvider
-            .GetRequiredService<IProfileStatusCategoryRepository>();
+        _profileStatusCategoryRepository = serviceProvider.GetRequiredService<IProfileStatusCategoryRepository>();
     }
 
     #endregion
@@ -62,27 +56,38 @@ public class KafkaActiveAccountConsumer : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            try
-            {
-                var consumer = builder.Consume(cancelToken.Token);
-                var kafkaActiveAccountEvent = JsonConvert
-                    .DeserializeObject<KafkaActiveAccountEvent>(consumer.Message.Value);
+            await UpdateProfileStatus(builder, cancelToken, activeStatus.ID);
+        }
+    }
 
-                var profileStatus = await _profileStatusRepository
-                    .GetByProfileIdAsync(kafkaActiveAccountEvent.UserId);
+    #endregion
 
-                if (profileStatus is null) continue;
+    #region snippet_Helpers
 
-                profileStatus.ProfileStatusCategoryID = activeStatus.ID;
+    private async Task UpdateProfileStatus
+    (
+        IConsumer<Ignore, string> builder,
+        CancellationTokenSource cancelToken,
+        string statusId
+    )
+    {
+        try
+        {
+            var consumer = builder.Consume(cancelToken.Token);
+            var kafkaActiveAccountEvent = JsonConvert.DeserializeObject<KafkaActiveAccountEvent>(consumer.Message.Value);
+            var profileStatus = await _profileStatusRepository.GetByProfileIdAsync(kafkaActiveAccountEvent.UserId);
 
-                await _profileStatusRepository.UpdateAsync(profileStatus);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError("AN ERROR HAS OCCURRED ACTIVATING CUSTOMER ACCOUNT:");
-                _logger.LogError(e.Message);
-                builder.Close();
-            }
+            if (profileStatus is null) return;
+
+            profileStatus.ProfileStatusCategoryID = statusId;
+
+            await _profileStatusRepository.UpdateAsync(profileStatus);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("AN ERROR HAS OCCURRED ACTIVATING CUSTOMER ACCOUNT:");
+            _logger.LogError(e.Message);
+            builder.Close();
         }
     }
 
