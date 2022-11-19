@@ -13,7 +13,6 @@ public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        Console.WriteLine("CONNECTION STRING: " + Environment.GetEnvironmentVariable("PG_DB_CONNECTION"));
         services.AddDbContext<EscortBookCustomerConsumerContext>(options
             => options.UseNpgsql(Environment.GetEnvironmentVariable("PG_DB_CONNECTION")));
         services.AddTransient<IProfileStatusCategoryRepository, ProfileStatusCategoryRepository>();

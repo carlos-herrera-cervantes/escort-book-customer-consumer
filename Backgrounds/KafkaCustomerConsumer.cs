@@ -29,20 +29,14 @@ public class KafkaCustomerConsumer : BackgroundService
 
     #region snippet_Constructor
 
-    public KafkaCustomerConsumer
-    (
-        ILogger<KafkaCustomerConsumer> logger,
-        IServiceScopeFactory factory
-    )
+    public KafkaCustomerConsumer(ILogger<KafkaCustomerConsumer> logger, IServiceScopeFactory factory)
     {
-        _logger = logger;
-
         var serviceProvider = factory.CreateScope().ServiceProvider;
 
+        _logger = logger;
         _profileRepository = serviceProvider.GetRequiredService<IProfileRepository>();
         _profileStatusRepository = serviceProvider.GetRequiredService<IProfileStatusRepository>();
-        _profileStatusCategoryRepository = serviceProvider
-            .GetRequiredService<IProfileStatusCategoryRepository>();
+        _profileStatusCategoryRepository = serviceProvider.GetRequiredService<IProfileStatusCategoryRepository>();
     }
 
     #endregion
@@ -66,34 +60,47 @@ public class KafkaCustomerConsumer : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            try
+            await CreateProfileStatus(builder, cancelToken, createdStatus.ID);
+        }
+    }
+
+    #endregion
+
+    #region snippet_Helpers
+
+    private async Task CreateProfileStatus
+    (
+        IConsumer<Ignore, string> builder,
+        CancellationTokenSource cancelToken,
+        string statusId
+    )
+    {
+        try
+        {
+            var consumer = builder.Consume(cancelToken.Token);
+            var kafkaUserEvent = JsonConvert.DeserializeObject<KafkaUserEvent>(consumer.Message.Value);
+
+            var newProfile = new Profile
             {
-                var consumer = builder.Consume(cancelToken.Token);
-                var kafkaUserEvent = JsonConvert
-                    .DeserializeObject<KafkaUserEvent>(consumer.Message.Value);
+                CustomerID = kafkaUserEvent.Id,
+                Email = kafkaUserEvent.Email
+            };
 
-                var newProfile = new Profile
-                {
-                    CustomerID = kafkaUserEvent.Id,
-                    Email = kafkaUserEvent.Email
-                };
+            await _profileRepository.CreateAsync(newProfile);
 
-                await _profileRepository.CreateAsync(newProfile);
-
-                var newProfileStatus = new ProfileStatus
-                {
-                    CustomerID = kafkaUserEvent.Id,
-                    ProfileStatusCategoryID = createdStatus.ID
-                };
-
-                await _profileStatusRepository.CreateAsync(newProfileStatus);
-            }
-            catch (Exception e)
+            var newProfileStatus = new ProfileStatus
             {
-                _logger.LogError("AN ERROR HAS OCCURRED CREATING A CUSTOMER");
-                _logger.LogError(e.Message);
-                builder.Close();
-            }
+                CustomerID = kafkaUserEvent.Id,
+                ProfileStatusCategoryID = statusId
+            };
+
+            await _profileStatusRepository.CreateAsync(newProfileStatus);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("AN ERROR HAS OCCURRED CREATING A CUSTOMER");
+            _logger.LogError(e.Message);
+            builder.Close();
         }
     }
 
