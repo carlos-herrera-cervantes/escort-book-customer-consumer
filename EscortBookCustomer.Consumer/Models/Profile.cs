@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EscortBookCustomerConsumer.Models;
+namespace EscortBookCustomer.Consumer.Models;
 
 [Table("profile", Schema = "public")]
 public class Profile

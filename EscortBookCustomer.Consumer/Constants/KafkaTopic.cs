@@ -1,4 +1,4 @@
-namespace EscortBookCustomerConsumer.Constants;
+namespace EscortBookCustomer.Consumer.Constants;
 
 public static class KafkaTopic
 {

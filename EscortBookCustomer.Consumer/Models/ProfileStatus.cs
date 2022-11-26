@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EscortBookCustomerConsumer.Models;
+namespace EscortBookCustomer.Consumer.Models;
 
 [Table("profile_status", Schema = "public")]
 public class ProfileStatus

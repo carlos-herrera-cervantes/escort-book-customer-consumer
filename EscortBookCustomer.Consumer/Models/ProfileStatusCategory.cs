@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EscortBookCustomerConsumer.Models;
+namespace EscortBookCustomer.Consumer.Models;
 
 [Table("profile_status_category", Schema = "public")]
 public class ProfileStatusCategory
@@ -15,7 +15,7 @@ public class ProfileStatusCategory
     public string Name { get; set; }
 
     [Column("active")]
-    public bool Active { get; set; }
+    public bool Active { get; set; } = true;
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
