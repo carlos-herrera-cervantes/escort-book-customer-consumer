@@ -1,7 +1,7 @@
-using EscortBookCustomerConsumer.Models;
+using EscortBookCustomer.Consumer.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace EscortBookCustomerConsumer.Contexts;
+namespace EscortBookCustomer.Consumer.Contexts;
 
 public class EscortBookCustomerConsumerContext : DbContext
 {

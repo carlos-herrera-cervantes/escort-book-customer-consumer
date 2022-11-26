@@ -1,17 +1,17 @@
 using System.Threading;
 using System.Threading.Tasks;
-using EscortBookCustomerConsumer.Types;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using Confluent.Kafka;
 using Newtonsoft.Json;
-using EscortBookCustomerConsumer.Repositories;
-using EscortBookCustomerConsumer.Models;
-using EscortBookCustomerConsumer.Constants;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using EscortBookCustomer.Consumer.Types;
+using EscortBookCustomer.Consumer.Repositories;
+using EscortBookCustomer.Consumer.Models;
+using EscortBookCustomer.Consumer.Constants;
 
-namespace EscortBookCustomerConsumer.Backgrounds;
+namespace EscortBookCustomer.Consumer.Backgrounds;
 
 public class KafkaCustomerConsumer : BackgroundService
 {

@@ -2,15 +2,15 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
-using EscortBookCustomerConsumer.Repositories;
-using EscortBookCustomerConsumer.Types;
-using EscortBookCustomerConsumer.Constants;
+using EscortBookCustomer.Consumer.Repositories;
+using EscortBookCustomer.Consumer.Types;
+using EscortBookCustomer.Consumer.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace EscortBookCustomerConsumer.Backgrounds;
+namespace EscortBookCustomer.Consumer.Backgrounds;
 
 public class KafkaActiveAccountConsumer : BackgroundService
 {
@@ -75,7 +75,7 @@ public class KafkaActiveAccountConsumer : BackgroundService
         {
             var consumer = builder.Consume(cancelToken.Token);
             var kafkaActiveAccountEvent = JsonConvert.DeserializeObject<KafkaActiveAccountEvent>(consumer.Message.Value);
-            var profileStatus = await _profileStatusRepository.GetByProfileIdAsync(kafkaActiveAccountEvent.UserId);
+            var profileStatus = await _profileStatusRepository.GetAsync(ps => ps.CustomerID == kafkaActiveAccountEvent.UserId);
 
             if (profileStatus is null) return;
 

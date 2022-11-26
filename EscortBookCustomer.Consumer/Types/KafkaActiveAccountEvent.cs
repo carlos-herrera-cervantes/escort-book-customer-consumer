@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace EscortBookCustomerConsumer.Types;
+namespace EscortBookCustomer.Consumer.Types;
 
 public class KafkaActiveAccountEvent
 {

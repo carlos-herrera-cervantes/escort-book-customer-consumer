@@ -1,9 +1,12 @@
+using System;
+using System.Linq.Expressions;
+using System.Linq;
 using System.Threading.Tasks;
-using EscortBookCustomerConsumer.Contexts;
-using EscortBookCustomerConsumer.Models;
 using Microsoft.EntityFrameworkCore;
+using EscortBookCustomer.Consumer.Contexts;
+using EscortBookCustomer.Consumer.Models;
 
-namespace EscortBookCustomerConsumer.Repositories;
+namespace EscortBookCustomer.Consumer.Repositories;
 
 public class ProfileStatusRepository : IProfileStatusRepository
 {
@@ -22,11 +25,14 @@ public class ProfileStatusRepository : IProfileStatusRepository
 
     #region snippet_ActionMethods
 
-    public async Task<ProfileStatus> GetByProfileIdAsync(string profileId)
+    public async Task<ProfileStatus> GetAsync(Expression<Func<ProfileStatus, bool>> expression)
         => await _context
             .ProfileStatus
             .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.CustomerID == profileId);
+            .FirstOrDefaultAsync(expression);
+
+    public async Task<int> CountAsync(Expression<Func<ProfileStatus, bool>> expression)
+        => await _context.ProfileStatus.CountAsync(expression);
 
     public async Task CreateAsync(ProfileStatus profileStatus)
     {
@@ -37,6 +43,13 @@ public class ProfileStatusRepository : IProfileStatusRepository
     public async Task UpdateAsync(ProfileStatus profileStatus)
     {
         _context.Entry(profileStatus).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(Expression<Func<ProfileStatus, bool>> expression)
+    {
+        var candidatesToDelete = await _context.ProfileStatus.Where(expression).ToListAsync();
+        _context.ProfileStatus.RemoveRange(candidatesToDelete);
         await _context.SaveChangesAsync();
     }
 
