@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Globalization;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
 using EscortBookCustomer.Consumer.Contexts;
 using EscortBookCustomer.Consumer.Repositories;
 using EscortBookCustomer.Consumer.Models;
-using System.Globalization;
-using System.Collections.Generic;
+using EscortBookCustomer.Consumer.Constants;
 
 namespace EscortBookCustomer.Tests.Repositories;
 
@@ -24,7 +24,7 @@ public class ProfileStatusRepositoryTests
     public ProfileStatusRepositoryTests()
     {
         _contextOptions = new DbContextOptionsBuilder<EscortBookCustomerConsumerContext>()
-            .UseNpgsql(Environment.GetEnvironmentVariable("PG_DB_CONNECTION"))
+            .UseNpgsql(PostgresClient.CustomerProfile)
             .Options;
     }
 

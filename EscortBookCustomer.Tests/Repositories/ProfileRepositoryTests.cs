@@ -6,6 +6,7 @@ using System.Globalization;
 using EscortBookCustomer.Consumer.Repositories;
 using EscortBookCustomer.Consumer.Contexts;
 using EscortBookCustomer.Consumer.Models;
+using EscortBookCustomer.Consumer.Constants;
 
 namespace EscortBookCustomer.Tests.Repositories;
 
@@ -23,7 +24,7 @@ public class ProfileRepositoryTests
     public ProfileRepositoryTests()
     {
         _contextOptions = new DbContextOptionsBuilder<EscortBookCustomerConsumerContext>()
-            .UseNpgsql(Environment.GetEnvironmentVariable("PG_DB_CONNECTION"))
+            .UseNpgsql(PostgresClient.CustomerProfile)
             .Options;
     }
 

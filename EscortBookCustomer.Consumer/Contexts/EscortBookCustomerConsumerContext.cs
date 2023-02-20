@@ -1,5 +1,5 @@
-using EscortBookCustomer.Consumer.Models;
 using Microsoft.EntityFrameworkCore;
+using EscortBookCustomer.Consumer.Models;
 
 namespace EscortBookCustomer.Consumer.Contexts;
 
