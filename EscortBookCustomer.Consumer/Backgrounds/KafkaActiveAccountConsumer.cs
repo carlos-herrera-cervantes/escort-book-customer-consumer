@@ -28,18 +28,14 @@ public class KafkaActiveAccountConsumer : BackgroundService
 
     #region snippet_Constructors
 
-    public KafkaActiveAccountConsumer(
-        ILogger<KafkaActiveAccountConsumer> logger,
-        IServiceScopeFactory factory,
-        IConsumer<Ignore, string> consumer
-    )
+    public KafkaActiveAccountConsumer(ILogger<KafkaActiveAccountConsumer> logger, IServiceScopeFactory factory)
     {
         var serviceProvider = factory.CreateScope().ServiceProvider;
 
         _logger = logger;
         _profileStatusRepository = serviceProvider.GetRequiredService<IProfileStatusRepository>();
         _profileStatusCategoryRepository = serviceProvider.GetRequiredService<IProfileStatusCategoryRepository>();
-        _consumer = consumer;
+        _consumer = serviceProvider.GetRequiredService<IConsumer<Ignore, string>>();
     }
 
     #endregion
