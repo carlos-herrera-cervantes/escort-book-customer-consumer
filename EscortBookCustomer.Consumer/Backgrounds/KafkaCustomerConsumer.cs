@@ -31,11 +31,7 @@ public class KafkaCustomerConsumer : BackgroundService
 
     #region snippet_Constructor
 
-    public KafkaCustomerConsumer(
-        ILogger<KafkaCustomerConsumer> logger,
-        IServiceScopeFactory factory,
-        IConsumer<Ignore, string> consumer
-    )
+    public KafkaCustomerConsumer(ILogger<KafkaCustomerConsumer> logger, IServiceScopeFactory factory)
     {
         var serviceProvider = factory.CreateScope().ServiceProvider;
 
@@ -43,7 +39,7 @@ public class KafkaCustomerConsumer : BackgroundService
         _profileRepository = serviceProvider.GetRequiredService<IProfileRepository>();
         _profileStatusRepository = serviceProvider.GetRequiredService<IProfileStatusRepository>();
         _profileStatusCategoryRepository = serviceProvider.GetRequiredService<IProfileStatusCategoryRepository>();
-        _consumer = consumer;
+        _consumer = serviceProvider.GetRequiredService<IConsumer<Ignore, string>>();
     }
 
     #endregion
